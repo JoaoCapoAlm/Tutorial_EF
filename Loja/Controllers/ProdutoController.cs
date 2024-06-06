@@ -21,7 +21,7 @@ namespace Loja.Controllers
             var pdt = await _context.Produto.AddAsync(new Produto()
             {
                 Nome = produtoDto.Nome,
-                Fornecedor = produtoDto.Fornecedor,
+                FornecedorId = produtoDto.FornecedorId,
                 Preco = produtoDto.Preco
             });
             await _context.SaveChangesAsync();
@@ -34,6 +34,7 @@ namespace Loja.Controllers
             var produto = await _context.Produto
                 .AsNoTracking()
                 .Where(x => x.Id.Equals(Id))
+                .Include(x => x.Fornecedor)
                 .FirstOrDefaultAsync();
 
             if (produto == null)
@@ -45,7 +46,7 @@ namespace Loja.Controllers
         [HttpGet]
         public async Task<IActionResult> List()
         {
-            var produtos = await _context.Produto.AsNoTracking().ToListAsync();
+            var produtos = await _context.Produto.AsNoTracking().Include(x => x.Fornecedor).ToListAsync();
 
             return Ok(produtos);
         }
@@ -59,7 +60,7 @@ namespace Loja.Controllers
 
             produto.Nome = dto.Nome;
             produto.Preco = dto.Preco;
-            produto.Fornecedor = dto.Fornecedor;
+            produto.FornecedorId = dto.FornecedorId;
 
             await _context.SaveChangesAsync();
 
