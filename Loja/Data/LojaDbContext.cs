@@ -10,5 +10,6 @@ namespace Loja.Data
         }
 
         public DbSet<Produto> Produto { get; set; }
+        public DbSet<Cliente> Cliente { get; set; }
     }
 }
