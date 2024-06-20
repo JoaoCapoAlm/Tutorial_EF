@@ -66,5 +66,23 @@ namespace Loja.Controllers
             await _service.DeleteProductAsync(Id);
             return NoContent();
         }
+
+        [HttpGet("{produtoId}/detalhado")]
+        [ProducesResponseType(typeof(IEnumerable<Venda>), 200)]
+        public async Task<IActionResult> GetByProdutoIdDetalhada([FromRoute] int produtoId)
+        {
+            var vendas = await _service.GetVendasDetalhadasByProdutoId(produtoId);
+
+            return Ok(vendas);
+        }
+
+        [HttpGet("{produtoId}/sumarizada")]
+        [ProducesResponseType(typeof(IEnumerable<Venda>), 200)]
+        public async Task<IActionResult> GetByProdutoIdSumarizada([FromRoute] int produtoId)
+        {
+            var vendas = await _service.GetVendasSumerizadasByProdutoId(produtoId);
+
+            return Ok(vendas);
+        }
     }
 }

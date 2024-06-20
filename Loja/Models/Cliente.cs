@@ -14,5 +14,6 @@ namespace Loja.Models
         public string Email { get; set; }
         [PasswordPropertyText]
         public string Password { get; set; }
+        public virtual IEnumerable<Venda> Vendas { get; set; }
     }
 }

@@ -12,6 +12,7 @@ namespace Loja.Data
         public DbSet<Produto> Produto { get; set; }
         public DbSet<Cliente> Cliente { get; set; }
         public DbSet<Fornecedor> Fornecedor { get; set; }
+        public DbSet<Venda> Venda { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -19,6 +20,16 @@ namespace Loja.Data
                 .HasOne(x => x.Fornecedor)
                 .WithMany(x => x.Produtos)
                 .HasForeignKey(x => x.FornecedorId);
+
+            modelBuilder.Entity<Venda>()
+                .HasOne(x => x.Produto)
+                .WithMany(x => x.Vendas)
+                .HasForeignKey(x => x.ProdutoId);
+
+            modelBuilder.Entity<Venda>()
+                .HasOne(x => x.Cliente)
+                .WithMany(x => x.Vendas)
+                .HasForeignKey(x => x.ClienteId);
 
             base.OnModelCreating(modelBuilder);
         }
