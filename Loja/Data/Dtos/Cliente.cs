@@ -1,4 +1,4 @@
 ﻿namespace Loja.Data.Dtos
 {
-    public record ClienteDto(string Nome, string Cpf, string Email);
+    public record ClienteDto(string Nome, string Cpf, string Email, string Password);
 }

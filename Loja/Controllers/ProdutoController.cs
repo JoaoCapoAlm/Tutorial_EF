@@ -1,52 +1,46 @@
-﻿using Loja.Data;
-using Loja.Data.Dtos;
+﻿using Loja.Data.Dtos;
 using Loja.Models;
+using Loja.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Loja.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
+    [Produces("application/json")]
     public class ProdutoController : ControllerBase
     {
-        private readonly LojaDbContext _context;
-        public ProdutoController(LojaDbContext context) {
-            _context = context;
+        private readonly ProdutoService _service;
+        public ProdutoController(ProdutoService service) {
+            _service = service;
         }
 
         [HttpPost]
         public async Task<ActionResult<Produto>> Create([FromBody] ProdutoDto produtoDto)
         {
-            var pdt = await _context.Produto.AddAsync(new Produto()
-            {
-                Nome = produtoDto.Nome,
-                FornecedorId = produtoDto.FornecedorId,
-                Preco = produtoDto.Preco
-            });
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetProduto), new { pdt.Entity.Id }, pdt.Entity);
+
+            var produto = await _service.AddProductAsync(produtoDto);
+            return CreatedAtAction(nameof(GetProduto), new { produto.Id }, produto);
         }
 
         [HttpGet("{Id}")]
-        public async Task<ActionResult<Produto>> GetProduto([FromRoute] int Id)
+        [ProducesResponseType(typeof(Produto), 200)]
+        public async Task<IActionResult> GetProduto([FromRoute] int Id)
         {
-            var produto = await _context.Produto
-                .AsNoTracking()
-                .Where(x => x.Id.Equals(Id))
-                .Include(x => x.Fornecedor)
-                .FirstOrDefaultAsync();
-
-            if (produto == null)
+            var produto = await _service.GetProductByIdAsync(Id);
+            if(produto == null)
                 return NotFound("Produto não encontrado");
 
             return Ok(produto);
         }
 
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<Produto>), 200)]
         public async Task<IActionResult> List()
         {
-            var produtos = await _context.Produto.AsNoTracking().Include(x => x.Fornecedor).ToListAsync();
+            var produtos = await _service.GetAllProductsAsync();
 
             return Ok(produtos);
         }
@@ -54,17 +48,23 @@ namespace Loja.Controllers
         [HttpPut("{Id}")]
         public async Task<IActionResult> Update([FromRoute] int Id, [FromBody] ProdutoDto dto)
         {
-            var produto = await _context.Produto.FirstAsync(x => x.Id.Equals(Id));
-            if(produto == null)
+            try
+            {
+                await _service.UpdateProductAsync(Id, dto);
+            }
+            catch (KeyNotFoundException)
+            {
                 return NotFound("Produto não encontrado");
+            }
 
-            produto.Nome = dto.Nome;
-            produto.Preco = dto.Preco;
-            produto.FornecedorId = dto.FornecedorId;
+            return NoContent();
+        }
 
-            await _context.SaveChangesAsync();
-
-            return Ok(produto);
+        [HttpDelete("{Id}")]
+        public async Task<IActionResult> Delete([FromRoute] int Id)
+        {
+            await _service.DeleteProductAsync(Id);
+            return NoContent();
         }
     }
 }
